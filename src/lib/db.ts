@@ -13,7 +13,6 @@ function createMockPrismaProxy(): PrismaClient {
       }
       if (typeof prop === 'symbol') return undefined;
 
-      // Return a function that can be invoked or chained with properties
       const mockFn = (..._args: unknown[]) => Promise.resolve(null);
       return new Proxy(mockFn, {
         get(_fnTarget, subProp) {
@@ -30,15 +29,14 @@ function createMockPrismaProxy(): PrismaClient {
 }
 
 function initializeDb(): PrismaClient {
-  if (process.env.DATABASE_URL) {
-    try {
+  try {
+    if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("localhost:5432")) {
       return new PrismaClient({
-        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+        log: ['error'],
       });
-    } catch (e) {
-      console.warn("PrismaClient init failed, using mock proxy:", e);
-      return createMockPrismaProxy();
     }
+  } catch (e) {
+    console.warn("PrismaClient notice, using mock proxy:", String(e));
   }
   return createMockPrismaProxy();
 }
