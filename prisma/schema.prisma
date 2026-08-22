@@ -1,0 +1,169 @@
+// Prisma Schema for Yojana Setu (योजना सेतु)
+// GovTech platform matching Indian citizens to welfare benefits
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User Roles
+enum Role {
+  CITIZEN
+  ADMIN
+}
+
+// Social Caste Categories in India
+enum CasteCategory {
+  GENERAL
+  OBC
+  SC
+  ST
+}
+
+// Scheme Scope
+enum SchemeOrigin {
+  CENTRAL
+  STATE
+}
+
+// Welfare Categories
+enum SchemeCategory {
+  AGRICULTURE
+  EDUCATION
+  HEALTHCARE
+  MSME
+  HOUSING
+  SOCIAL_WELFARE
+}
+
+// Citizen Benefit Application Statuses
+enum ApplicationStatus {
+  INTERESTED
+  DOCS_PENDING
+  APPLIED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id               String                 @id @default(cuid())
+  email            String?                @unique
+  phone            String?                @unique
+  password         String?
+  role             Role                   @default(CITIZEN)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  profile          UserProfile?
+  applications     ApplicationTracker[]
+  checklistItems   UserDocumentChecklist[]
+}
+
+model UserProfile {
+  id                 String        @id @default(cuid())
+  userId             String        @unique
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  state              String
+  district           String
+  age                Int
+  gender             String
+  occupation         String
+  annualIncome       Int
+  casteCategory      CasteCategory
+  landHoldingAcres   Float         @default(0.0)
+  isStudent          Boolean       @default(false)
+  isSpeciallyAbled   Boolean       @default(false)
+  isSeniorCitizen    Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+model Scheme {
+  id                   String               @id @default(cuid())
+  title                String
+  slug                 String               @unique
+  ministry             String
+  department           String
+  description          String               @db.Text
+  benefitAmountText    String
+  annualValueEstimate  Int                  @default(0)
+  origin               SchemeOrigin
+  targetState          String?
+  officialUrl          String
+  category             SchemeCategory
+  isActive             Boolean              @default(true)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  eligibilityRules     EligibilityRule[]
+  requiredDocuments    SchemeDocument[]
+  applications         ApplicationTracker[]
+
+  @@index([targetState, origin])
+  @@index([category])
+  @@index([isActive])
+}
+
+model EligibilityRule {
+  id                   String    @id @default(cuid())
+  schemeId             String
+  scheme               Scheme    @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  minAge               Int?
+  maxAge               Int?
+  maxIncome            Int?
+  allowedGenders       String[]  // Empty means open to all genders
+  allowedOccupations   String[]  // Empty means open to all occupations
+  allowedCategories    String[]  // Empty means open to GENERAL, OBC, SC, ST
+  maxLandAcres         Float?
+  requiresStudent      Boolean?
+  requiresSpeciallyAbled Boolean?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([schemeId])
+}
+
+model SchemeDocument {
+  id           String   @id @default(cuid())
+  schemeId     String
+  scheme       Scheme   @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  documentName String
+  isMandatory  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([schemeId])
+}
+
+model ApplicationTracker {
+  id                     String            @id @default(cuid())
+  userId                 String
+  user                   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schemeId               String
+  scheme                 Scheme            @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  status                 ApplicationStatus @default(INTERESTED)
+  applicationReferenceNo String?
+  notes                  String?           @db.Text
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  @@unique([userId, schemeId])
+  @@index([userId, status])
+}
+
+model UserDocumentChecklist {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentName      String
+  isUploadedOrReady Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([userId, documentName])
+  @@index([userId])
+}

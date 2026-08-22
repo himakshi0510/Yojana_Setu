@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@theme inline {
+  --color-brand-saffron: #EA580C;
+  --color-brand-navy: #0F172A;
+  --color-brand-emerald: #059669;
+  --color-brand-surface: #FFFFFF;
+  --color-brand-bg: #F8FAFC;
+  
+  --font-sans: var(--font-inter);
+}
+
+body {
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  @apply antialiased;
+}
+
+.dark body {
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6, .dark span, .dark p {
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+@media print { @page { margin: 0; } body { margin: 1cm; } }
+
+body { top: 0 !important; } .skiptranslate { display: none !important; } .goog-te-banner-frame { display: none !important; } #goog-gt-tt { display: none !important; }
+
+/* ── CSC Operator / Village Kiosk Mode ─────────────────────────────────── */
+.kiosk-mode {
+  font-size: 120% !important;
+  letter-spacing: 0.02em;
+}
+.kiosk-mode body {
+  background: #000 !important;
+  color: #fff !important;
+}
+.kiosk-mode button, .kiosk-mode a {
+  min-height: 52px;
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+}
+.kiosk-mode p, .kiosk-mode span {
+  font-size: 1.05rem !important;
+  line-height: 1.7 !important;
+}
+.kiosk-mode h1, .kiosk-mode h2, .kiosk-mode h3 {
+  font-size: 1.6rem !important;
+  font-weight: 900 !important;
+}
+.kiosk-mode * {
+  border-radius: 12px !important;
+  outline-offset: 4px;
+}
+.kiosk-mode :focus-visible {
+  outline: 3px solid #EA580C !important;
+}
+
