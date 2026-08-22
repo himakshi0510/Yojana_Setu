@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -13,11 +13,14 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#EA580C",
+};
+
 export const metadata: Metadata = {
   title: "Yojana Setu — योजना सेतु | Government Schemes Made Simple",
   description: "AI-powered GovTech platform matching Indian citizens to welfare benefits, subsidies, and government schemes.",
   manifest: "/manifest.json",
-  themeColor: "#EA580C",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
